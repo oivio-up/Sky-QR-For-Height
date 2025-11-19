@@ -152,6 +152,10 @@
     border: 1px solid transparent;
 }
 
+.summary-item:nth-child(3) {
+    grid-column: span 2;
+}
+
 html[data-theme='dark'] .summary-item {
     border-color: rgba(255, 255, 255, 0.05);
 }
@@ -592,17 +596,20 @@ html[data-theme='dark'] .summary-item {
     max-height: none;
     overflow-y: visible;
     overflow-x: hidden;
+    width: 100%;
 }
 
 .id-record-item {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 10px 15px 10px 15px;
-    padding-right: 10px;
+    padding: 12px 15px;
+    padding-right: 50px;
     border-top: 1px solid var(--details-bg);
     cursor: pointer;
     transition: background 0.2s;
+    width: 100%;
+    box-sizing: border-box;
+    position: relative;
 }
 
 .id-record-item:hover {
@@ -612,9 +619,10 @@ html[data-theme='dark'] .summary-item {
 .record-main {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
     flex: 1;
-    gap: 15px;
+    min-width: 0;
+    gap: 20px;
 }
 
 .record-value {
@@ -622,14 +630,24 @@ html[data-theme='dark'] .summary-item {
     font-weight: bold;
     font-size: 0.95em;
     color: var(--text-color);
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .record-time {
     font-size: 0.8em;
     color: var(--label-color);
+    white-space: nowrap;
+    flex-shrink: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .delete-record-btn {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
     width: 24px;
     height: 24px;
     background: none;
@@ -644,7 +662,7 @@ html[data-theme='dark'] .summary-item {
     justify-content: center;
     border-radius: 4px;
     transition: all 0.2s;
-    margin-left: 10px;
+    flex-shrink: 0;
 }
 
 .delete-record-btn:hover {
@@ -683,9 +701,19 @@ html[data-theme='dark'] .summary-item {
     }
     
     .record-main {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 5px;
+        gap: 10px;
+    }
+    
+    .record-value {
+        font-size: 0.9em;
+    }
+    
+    .record-time {
+        font-size: 0.75em;
+    }
+    
+    .id-record-item {
+        padding: 10px 12px;
     }
     
     .history-page-header {

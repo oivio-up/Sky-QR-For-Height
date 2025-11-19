@@ -4,7 +4,7 @@
 // Parsing Algorithm: Enhanced 3-format support
 // ==========================================
 
-let currentLang = 'zh-Hant';
+let currentLang = 'zh-Hans';
 
 const backgroundImages = [
     'images/bg1.png',
@@ -57,7 +57,7 @@ function setLanguage(lang) {
     
     // 更新导航栏语言显示
     const langMap = {
-        'zh-Hant': '简中',
+        'zh-Hans': '简',
         'en': 'En',
     };
     const currentLangEl = document.getElementById('current-lang');
@@ -368,7 +368,7 @@ function decodeAndCalculate(rawData) {
 // ==========================================
 
 document.addEventListener('DOMContentLoaded', () => {
-    const savedLang = localStorage.getItem('language') || 'zh-Hant';
+    const savedLang = localStorage.getItem('language') || 'zh-Hans';
     setLanguage(savedLang);
 
     const savedTheme = localStorage.getItem('theme') || 'light';
@@ -790,7 +790,7 @@ function loadHistory() {
     const summaryTotalEl = document.getElementById('history-summary-total');
     const summaryShowingEl = document.getElementById('history-summary-showing');
     const summaryLastEl = document.getElementById('history-summary-last');
-    const locale = currentLang === 'zh-Hant' ? 'zh-TW' : currentLang;
+    const locale = currentLang === 'zh-Hans' ? 'zh-CN' : currentLang;
 
     if (summaryTotalEl) {
         summaryTotalEl.textContent = rawHistory.length;
@@ -928,6 +928,7 @@ function loadHistory() {
         items.forEach(item => {
             const recordLi = document.createElement('li');
             recordLi.className = 'id-record-item';
+            recordLi.setAttribute('data-index', item.originalIndex);
 
             const recordMain = document.createElement('div');
             recordMain.className = 'record-main';
@@ -996,6 +997,7 @@ function loadHistory() {
         noIdItems.forEach(item => {
             const recordLi = document.createElement('li');
             recordLi.className = 'id-record-item';
+            recordLi.setAttribute('data-index', item.originalIndex);
 
             const recordMain = document.createElement('div');
             recordMain.className = 'record-main';
@@ -1087,7 +1089,72 @@ function deleteHistoryItem(index) {
     let history = JSON.parse(localStorage.getItem('heightHistory') || '[]');
     history.splice(index, 1);
     localStorage.setItem('heightHistory', JSON.stringify(history));
-    loadHistory();
+    
+    // 找到要删除的记录元素
+    const recordElement = document.querySelector(`.id-record-item[data-index="${index}"]`);
+    if (!recordElement) {
+        // 如果找不到元素，回退到重新加载
+        loadHistory();
+        return;
+    }
+    
+    // 找到父ID组
+    const idGroup = recordElement.closest('.history-id-group');
+    const recordsList = recordElement.closest('.id-group-records');
+    
+    // 删除记录元素
+    recordElement.remove();
+    
+    // 更新所有索引大于被删除索引的记录的 data-index 属性
+    document.querySelectorAll('.id-record-item').forEach(item => {
+        const itemIndex = parseInt(item.getAttribute('data-index'));
+        if (itemIndex > index) {
+            item.setAttribute('data-index', itemIndex - 1);
+        }
+    });
+    
+    // 检查该ID组是否还有其他记录
+    const remainingRecords = recordsList ? recordsList.querySelectorAll('.id-record-item') : [];
+    
+    if (remainingRecords.length === 0 && idGroup) {
+        // 如果该ID组没有记录了，删除整个组
+        idGroup.remove();
+    } else {
+        // 更新该ID组的记录计数
+        const countBadge = idGroup ? idGroup.querySelector('.record-count-badge') : null;
+        if (countBadge) {
+            countBadge.textContent = `${remainingRecords.length} ${t('record_count') || '条记录'}`;
+        }
+    }
+    
+    // 更新摘要统计
+    const summaryTotalEl = document.getElementById('history-summary-total');
+    const summaryShowingEl = document.getElementById('history-summary-showing');
+    const summaryLastEl = document.getElementById('history-summary-last');
+    const locale = currentLang === 'zh-Hans' ? 'zh-CN' : currentLang;
+    
+    if (summaryTotalEl) {
+        summaryTotalEl.textContent = history.length;
+    }
+    if (summaryShowingEl) {
+        const currentShowing = parseInt(summaryShowingEl.textContent) || 0;
+        summaryShowingEl.textContent = Math.max(0, currentShowing - 1);
+    }
+    if (summaryLastEl) {
+        if (history.length > 0 && history[0].timestamp) {
+            summaryLastEl.textContent = new Date(history[0].timestamp).toLocaleString(locale);
+        } else {
+            summaryLastEl.textContent = t('history_summary_none') || '--';
+        }
+    }
+    
+    // 如果历史记录为空，显示空状态
+    if (history.length === 0) {
+        const historyList = document.getElementById('history-list');
+        const emptyStateEl = document.getElementById('history-empty-state');
+        if (historyList) historyList.style.display = 'none';
+        if (emptyStateEl) emptyStateEl.style.display = 'block';
+    }
 }
 
 // ==========================================
@@ -1164,7 +1231,7 @@ function showHeightChart(targetId) {
     // 准备图表数据
     const labels = filteredRecords.map((item, index) => {
         const date = new Date(item.timestamp);
-        return date.toLocaleString(currentLang === 'zh-Hant' ? 'zh-TW' : currentLang, {
+        return date.toLocaleString(currentLang === 'zh-Hans' ? 'zh-CN' : currentLang, {
             month: '2-digit',
             day: '2-digit',
             hour: '2-digit',
